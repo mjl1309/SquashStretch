@@ -5,6 +5,9 @@
 //  Created by Mike Lyman on 7/31/13.
 //  Copyright Mike Lyman 2013. All rights reserved.
 //
+// Artwork Evolution: http://artworkevolution.com/blog/
+// Code written by Mike Lyman, based off cocos2D template project.
+//
 
 
 // Import the interfaces
@@ -13,7 +16,14 @@
 // Needed to obtain the Navigation Controller
 #import "AppDelegate.h"
 
+// Needed to support gestures on ccsprites
+#import "CCNode+SFGestureRecognizers.h"
+
 #pragma mark - HelloWorldLayer
+
+static float kMotionAnimationThreshold = 1000;
+static float kOriginalScale = 1.0;
+static float kAngleWhereSkewStartsLookingBad = 45;
 
 // HelloWorldLayer implementation
 @implementation HelloWorldLayer
@@ -37,97 +47,82 @@
 // on "init" you need to initialize your instance
 -(id) init
 {
-	// always call "super" init
-	// Apple recommends to re-assign "self" with the "super's" return value
-	if( (self=[super init]) ) {
-		
-		// create and initialize a Label
-		CCLabelTTF *label = [CCLabelTTF labelWithString:@"Hello World" fontName:@"Marker Felt" fontSize:64];
-
-		// ask director for the window size
-		CGSize size = [[CCDirector sharedDirector] winSize];
-	
-		// position the label on the center of the screen
-		label.position =  ccp( size.width /2 , size.height/2 );
-		
-		// add the label as a child to this Layer
-		[self addChild: label];
-		
-		
-		
-		//
-		// Leaderboards and Achievements
-		//
-		
-		// Default font size will be 28 points.
-		[CCMenuItemFont setFontSize:28];
-		
-		// to avoid a retain-cycle with the menuitem and blocks
-		__block id copy_self = self;
-		
-		// Achievement Menu Item using blocks
-		CCMenuItem *itemAchievement = [CCMenuItemFont itemWithString:@"Achievements" block:^(id sender) {
-			
-			
-			GKAchievementViewController *achivementViewController = [[GKAchievementViewController alloc] init];
-			achivementViewController.achievementDelegate = copy_self;
-			
-			AppController *app = (AppController*) [[UIApplication sharedApplication] delegate];
-			
-			[[app navController] presentModalViewController:achivementViewController animated:YES];
-			
-			[achivementViewController release];
-		}];
-		
-		// Leaderboard Menu Item using blocks
-		CCMenuItem *itemLeaderboard = [CCMenuItemFont itemWithString:@"Leaderboard" block:^(id sender) {
-			
-			
-			GKLeaderboardViewController *leaderboardViewController = [[GKLeaderboardViewController alloc] init];
-			leaderboardViewController.leaderboardDelegate = copy_self;
-			
-			AppController *app = (AppController*) [[UIApplication sharedApplication] delegate];
-			
-			[[app navController] presentModalViewController:leaderboardViewController animated:YES];
-			
-			[leaderboardViewController release];
-		}];
-
-		
-		CCMenu *menu = [CCMenu menuWithItems:itemAchievement, itemLeaderboard, nil];
-		
-		[menu alignItemsHorizontallyWithPadding:20];
-		[menu setPosition:ccp( size.width/2, size.height/2 - 50)];
-		
-		// Add the menu to the layer
-		[self addChild:menu];
-
+	if( (self=[super init]) ) {\
+//        Create a sprite and enable touch
+        self.sprite = [[CCSprite alloc] initWithFile:@"Icon.png"];
+        [self addChild:self.sprite];
+        self.sprite.position = ccp(self.boundingBox.size.width/2,self.boundingBox.size.height/2);
+        self.sprite.isTouchEnabled = YES;
+        
+//        Create a pan gesture recognizer and add it to the sprite
+        UIPanGestureRecognizer *panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self
+                                                                                     action:@selector(handlePanGesture:)];
+        panGesture.delegate = self;
+        panGesture.delaysTouchesBegan = NO;
+//        Sprite and gesture support from CCNode+SFGestureRecognizers.h
+        [self.sprite addGestureRecognizer:panGesture];
 	}
 	return self;
 }
 
-// on "dealloc" you need to release all your retained objects
-- (void) dealloc
-{
-	// in case you have something to dealloc, do it in this method
-	// in this particular example nothing needs to be released.
-	// cocos2d will automatically release all the children (Label)
-	
-	// don't forget to call "super dealloc"
-	[super dealloc];
+
+/**** Artwork Evolution: http://artworkevolution.com/blog/
+ handlePangesture: moves the sprite with the player's finger and causes squash-stretch animations.
+ Some of the constant values below have been chosen through trail-and-error to find an animation that looks good.
+ Depending on how drastic you want your squash and stretch to be you may want to tweak the values, mess with skewY as well, or come up with new equations entirely!
+ ****/
+- (void)handlePanGesture:(UIPanGestureRecognizer*)panGesture {
+    
+//    Get the velocity of the pan
+    CGPoint velocity = [panGesture velocityInView:panGesture.view];
+    
+//    Translate the sprite to the pan's location
+    CGPoint translation = [panGesture translationInView:panGesture.view];
+    translation.y *= -1;
+    [panGesture setTranslation:CGPointZero inView:panGesture.view];
+    CGPoint p = ccpAdd(self.sprite.position, translation);
+    self.sprite.position = ccp(p.x,p.y);
+    
+//    Squashing and stretching animation code below
+    //    Get the angle of motion the sprite is moving in
+    float angle = atan2f(velocity.y, velocity.x);
+    float newScaleX;
+    float newScaleY;
+    if (hypot(velocity.x, velocity.y) > kMotionAnimationThreshold) {
+//        If the X velocity is greater, stretch in X, squash in Y. And vice versa
+        if (fabsf(velocity.x) > fabsf(velocity.y)) {
+            newScaleX = kOriginalScale + ((0.5 - fabsf(cos(angle) * sin(angle))) * fabsf((velocity.x / 750)));
+            newScaleY = kOriginalScale / newScaleX;
+        }
+        else {
+            newScaleY = kOriginalScale + ((0.5 - fabsf(cos(angle) * sin(angle))) * fabsf((velocity.y / 750)));
+            newScaleX = kOriginalScale / newScaleY;
+        }
+        
+        self.sprite.scaleX = newScaleX;
+        self.sprite.scaleY = newScaleY;
+        
+        float skew = -kAngleWhereSkewStartsLookingBad * (sin(angle) * cos(angle) * hypotf(velocity.x, velocity.y) / 1000 );
+        if (skew < 0 && skew < -kAngleWhereSkewStartsLookingBad) {
+            skew = -kAngleWhereSkewStartsLookingBad;
+        }
+        else if (skew > 0 && skew > kAngleWhereSkewStartsLookingBad) {
+            skew = kAngleWhereSkewStartsLookingBad;
+        }
+        self.sprite.skewX = skew;
+    }
+    else {
+        self.sprite.skewX = 0;
+        self.sprite.scaleX = kOriginalScale;
+        self.sprite.scaleY = kOriginalScale;
+    }
+    if (panGesture.state == UIGestureRecognizerStateEnded || panGesture.state == UIGestureRecognizerStateCancelled) {
+        self.sprite.skewX = 0;
+        self.sprite.scaleX = kOriginalScale;
+        self.sprite.scaleY = kOriginalScale;
+    }
+
+    
 }
 
-#pragma mark GameKit delegate
-
--(void) achievementViewControllerDidFinish:(GKAchievementViewController *)viewController
-{
-	AppController *app = (AppController*) [[UIApplication sharedApplication] delegate];
-	[[app navController] dismissModalViewControllerAnimated:YES];
-}
-
--(void) leaderboardViewControllerDidFinish:(GKLeaderboardViewController *)viewController
-{
-	AppController *app = (AppController*) [[UIApplication sharedApplication] delegate];
-	[[app navController] dismissModalViewControllerAnimated:YES];
-}
 @end

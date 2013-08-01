@@ -13,11 +13,16 @@
 #import "cocos2d.h"
 
 // HelloWorldLayer
-@interface HelloWorldLayer : CCLayer <GKAchievementViewControllerDelegate, GKLeaderboardViewControllerDelegate>
+@interface HelloWorldLayer : CCLayer <UIGestureRecognizerDelegate>
 {
 }
 
+/* Begin Artwork Evolution Code */
+@property (atomic, strong) CCSprite *sprite;
+
+
 // returns a CCScene that contains the HelloWorldLayer as the only child
 +(CCScene *) scene;
+
 
 @end

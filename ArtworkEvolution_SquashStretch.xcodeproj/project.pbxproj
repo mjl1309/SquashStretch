@@ -140,6 +140,7 @@
 		271403DA17A9A46E005B0EA0 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 271403D917A9A46E005B0EA0 /* AppDelegate.m */; };
 		271403DD17A9A46E005B0EA0 /* HelloWorldLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 271403DC17A9A46E005B0EA0 /* HelloWorldLayer.m */; };
 		271403E017A9A46E005B0EA0 /* IntroLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 271403DF17A9A46E005B0EA0 /* IntroLayer.m */; };
+		271403E817A9A796005B0EA0 /* CCNode+SFGestureRecognizers.m in Sources */ = {isa = PBXBuildFile; fileRef = 271403E717A9A796005B0EA0 /* CCNode+SFGestureRecognizers.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -422,6 +423,8 @@
 		271403DC17A9A46E005B0EA0 /* HelloWorldLayer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HelloWorldLayer.m; sourceTree = "<group>"; };
 		271403DE17A9A46E005B0EA0 /* IntroLayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IntroLayer.h; sourceTree = "<group>"; };
 		271403DF17A9A46E005B0EA0 /* IntroLayer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IntroLayer.m; sourceTree = "<group>"; };
+		271403E617A9A796005B0EA0 /* CCNode+SFGestureRecognizers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CCNode+SFGestureRecognizers.h"; sourceTree = "<group>"; };
+		271403E717A9A796005B0EA0 /* CCNode+SFGestureRecognizers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CCNode+SFGestureRecognizers.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -482,6 +485,8 @@
 		2714024A17A9A46C005B0EA0 /* ArtworkEvolution_SquashStretch */ = {
 			isa = PBXGroup;
 			children = (
+				271403E617A9A796005B0EA0 /* CCNode+SFGestureRecognizers.h */,
+				271403E717A9A796005B0EA0 /* CCNode+SFGestureRecognizers.m */,
 				271403D817A9A46E005B0EA0 /* AppDelegate.h */,
 				271403D917A9A46E005B0EA0 /* AppDelegate.m */,
 				271403DB17A9A46E005B0EA0 /* HelloWorldLayer.h */,
@@ -1058,6 +1063,7 @@
 				271403DA17A9A46E005B0EA0 /* AppDelegate.m in Sources */,
 				271403DD17A9A46E005B0EA0 /* HelloWorldLayer.m in Sources */,
 				271403E017A9A46E005B0EA0 /* IntroLayer.m in Sources */,
+				271403E817A9A796005B0EA0 /* CCNode+SFGestureRecognizers.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
